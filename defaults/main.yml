@@ -1,0 +1,151 @@
+---
+# Docker settings
+###############################################################################
+
+# Docker Compose project installation directory
+redis_install_dir: /opt/redis
+
+# Docker tag to be installed
+redis_docker_tag: latest
+
+# Restart policy
+redis_docker_restart_policy: always
+
+# Pull the latest Docker image
+redis_docker_pull: true
+
+# Install Docker
+redis_install_docker: true
+
+# Install Redis Sentinel
+redis_install_sentinel: true
+
+# Redis Server data type (volume | directory)
+redis_server_data_volume_type: directory
+
+# Redis Host data directory
+redis_host_data_dir_path: /var/lib/redis
+
+# Redis configuration directory path on host
+redis_host_config_dir_path: "{{ redis_install_dir }}/conf"
+
+# Additional environment variables
+redis_server_additional_env_vars: {}
+
+# Redis uid
+redis_uid: 999
+
+# Redis gid
+redis_gid: 999
+
+# Build Redis config files from template
+redis_config_file_from_template: true
+
+# Redis Server config file path
+# (used when redis_config_file_from_template is false)
+redis_server_config_file_path: redis-server.conf
+
+# Redis Sentinel config file path
+# (used when redis_config_file_from_template is false)
+redis_sentinel_config_file_path: redis-sentinel.conf
+
+# Install Redis Tools
+redis_install_redis_tools: true
+
+# Redis Server settings
+###############################################################################
+
+# Redis Server port to be redirect from host
+redis_server_host_port: 6379
+
+# Redis Server host log file path
+redis_server_host_log_file_path: /var/log/redis/redis-server.log
+
+# Redis Server protected mode
+redis_server_protected_mode: false
+
+# Redis Server requirepass
+redis_server_requirepass: password
+
+# TCP listen() backlog.
+redis_server_tcp_backlog: 511
+
+# Number of databases
+redis_server_databases: 16
+
+# Close the connection after a client is idle for N seconds (0 to disable)
+redis_server_timeout: 0
+
+# TCP keepalive
+redis_server_tcp_keepalive: 300
+
+# Log level
+redis_server_loglevel: notice
+
+# Save the DB on disk
+redis_server_save:
+  - 900 1
+  - 300 10
+  - 60 10000
+
+# Set a memory usage limit to the specified amount of bytes
+redis_server_maxmemory: 1gb
+
+# Master-replica replication configuration (uncomment to enable)
+# redis_server_replicaof:
+#   host: masterip
+#   port: masterport
+# redis_server_masterauth: password
+# redis_server_masteruser: user
+
+# Replica announce IP
+redis_server_replica_announce_ip: "{{ ansible_default_ipv4.address }}"
+
+# Replica announce port
+redis_server_replica_announce_port: "{{ redis_server_host_port }}"
+
+# Additional configurations: use yes/no for booleans here!
+redis_server_additional_config: []
+
+
+# Redis Sentinel settings
+###############################################################################
+
+# Redis Sentinel port to be redirect from host
+redis_sentinel_host_port: 26379
+
+# Redis Sentinel host log file path
+redis_sentinel_host_log_file_path: /var/log/redis/redis-sentinel.log
+
+# Redis Sentinel protected mode
+redis_sentinel_protected_mode: false
+
+# Redis Sentinel master name
+redis_sentinel_master_name: mymaster
+
+# Redis Sentinel master IP
+redis_sentinel_master_ip: "{{ ansible_default_ipv4.address }}"
+
+# Redis Sentinel master port
+redis_sentinel_master_port: 6379
+
+# Redis Sentinel quorum
+redis_sentinel_quorum: 2
+
+# Redis Sentinel master password (uncomment to enable)
+# redis_sentinel_master_password: password
+
+# Redis Sentinel master user (uncomment to enable)
+# redis_sentinel_master_user: sentinel-user
+
+# Redis Sentinel down after milliseconds
+redis_sentinel_down_after_milliseconds: 10000
+
+# Redis Sentinel failover timeout
+redis_sentinel_failover_timeout: 60000
+
+# Redis Sentinel announce IP
+redis_sentinel_announce_ip: "{{ ansible_default_ipv4.address }}"
+
+# Redis Sentinel announce port
+redis_sentinel_announce_port: "{{ redis_sentinel_host_port }}"

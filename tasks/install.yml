@@ -1,0 +1,83 @@
+---
+- name: Install Docker
+  ansible.builtin.import_role:
+    name: mmartinello.docker
+  when: redis_install_docker
+
+- name: Create the Docker Compose project destination directory
+  ansible.builtin.file:
+    path: "{{ redis_install_dir }}"
+    state: directory
+    recurse: true
+
+- name: Create the Docker Compose configuration file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ redis_install_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0640"
+  notify: Start the Docker Compose project
+
+- name: Create the environment file
+  ansible.builtin.template:
+    src: .env.j2
+    dest: "{{ redis_install_dir }}/.env"
+    owner: root
+    group: root
+    mode: "0640"
+  notify: Start the Docker Compose project
+
+- name: Create the Redis Data directory
+  ansible.builtin.file:
+    path: "{{ redis_host_data_dir_path }}"
+    state: directory
+    recurse: true
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: "0755"
+  when: redis_server_data_volume_type == 'directory'
+
+- name: Create the Redis Server Log directory
+  ansible.builtin.file:
+    path: "{{ redis_server_host_log_file_path | dirname }}"
+    state: directory
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: "0755"
+    recurse: true
+
+- name: Create the Redis Server Log file
+  ansible.builtin.file:
+    path: "{{ redis_server_host_log_file_path }}"
+    state: touch
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: "0640"
+
+- name: Create the Redis Sentinel Log directory
+  ansible.builtin.file:
+    path: "{{ redis_sentinel_host_log_file_path | dirname }}"
+    state: directory
+    recurse: true
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: "0755"
+  when: redis_install_sentinel
+
+- name: Create the Redis Sentinel Log file
+  ansible.builtin.file:
+    path: "{{ redis_sentinel_host_log_file_path }}"
+    state: touch
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: "0640"
+  when: redis_install_sentinel
+
+- name: Install Redis Tools
+  ansible.builtin.apt:
+    name:
+      - redis-tools
+    state: present
+    update_cache: true
+  when: redis_install_redis_tools

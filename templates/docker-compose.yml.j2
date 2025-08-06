@@ -1,0 +1,35 @@
+# {{ ansible_managed }}
+
+# {{ _docker_compose_project_name }} Docker Compose file
+
+services:
+  redis-server:
+    image: redis:${IMAGE_TAG:-latest}
+    env_file: .env
+    restart: ${DOCKER_RESTART_POLICY:-always}
+    ports:
+      - ${REDIS_SERVER_HOST_PORT:-6379}:6379
+    command: redis-server /etc/redis/redis-server.conf
+    volumes:
+      - ./conf:/etc/redis
+      - ${REDIS_SERVER_HOST_LOG_FILE_PATH}:/var/log/redis-server.log
+      - ${REDIS_HOST_DATA_DIR_PATH}:/var/lib/redis
+
+{% if redis_install_sentinel %}
+  redis-sentinel:
+    image: redis:${IMAGE_TAG:-latest}
+    env_file: .env
+    restart: ${DOCKER_RESTART_POLICY:-always}
+    ports:
+      - ${REDIS_SENTINEL_HOST_PORT:-26379}:26379
+    command: redis-server /etc/redis/redis-sentinel.conf --sentinel
+    volumes:
+      - ./conf:/etc/redis
+      - ${REDIS_SENTINEL_HOST_LOG_FILE_PATH}:/var/log/redis-sentinel.log
+      - ${REDIS_HOST_DATA_DIR_PATH}:/var/lib/redis
+{% endif %}
+
+{% if redis_server_data_volume_type == 'volume' %}
+volumes:
+  data:
+{% endif %}

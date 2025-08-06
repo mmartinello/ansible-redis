@@ -1,0 +1,63 @@
+---
+- name: Start the Docker Compose project
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: "{{ redis_install_dir }}"
+  register: _command_output
+  changed_when: _command_output.rc == 0
+
+- name: Restart the Docker Compose project
+  ansible.builtin.command:
+    cmd: docker compose restart
+    chdir: "{{ redis_install_dir }}"
+  register: _command_output
+  changed_when: _command_output.rc == 0
+
+- name: Stop the Docker Compose project
+  ansible.builtin.command:
+    cmd: docker compose down
+    chdir: "{{ redis_install_dir }}"
+  register: _command_output
+  changed_when: _command_output.rc == 0
+
+- name: Start Redis Server
+  ansible.builtin.command:
+    cmd: docker compose up -d redis-server
+    chdir: "{{ redis_install_dir }}"
+  register: _command_output
+  changed_when: _command_output.rc == 0
+
+- name: Restart Redis Server
+  ansible.builtin.command:
+    cmd: docker compose restart redis-server
+    chdir: "{{ redis_install_dir }}"
+  register: _command_output
+  changed_when: _command_output.rc == 0
+
+- name: Stop Redis Server
+  ansible.builtin.command:
+    cmd: docker compose down redis-server
+    chdir: "{{ redis_install_dir }}"
+  register: _command_output
+  changed_when: _command_output.rc == 0
+
+- name: Start Redis Sentinel
+  ansible.builtin.command:
+    cmd: docker compose up -d redis-sentinel
+    chdir: "{{ redis_install_dir }}"
+  register: _command_output
+  changed_when: _command_output.rc == 0
+
+- name: Restart Redis Sentinel
+  ansible.builtin.command:
+    cmd: docker compose restart redis-sentinel
+    chdir: "{{ redis_install_dir }}"
+  register: _command_output
+  changed_when: _command_output.rc == 0
+
+- name: Stop Redis Sentinel
+  ansible.builtin.command:
+    cmd: docker compose down redis-sentinel
+    chdir: "{{ redis_install_dir }}"
+  register: _command_output
+  changed_when: _command_output.rc == 0

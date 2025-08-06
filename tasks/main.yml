@@ -1,0 +1,29 @@
+---
+# Install
+- name: Import install tasks
+  ansible.builtin.import_tasks: install.yml
+  tags: ['install']
+
+# Configure
+- name: Import configure tasks
+  ansible.builtin.import_tasks: configure.yml
+  tags: ['configure']
+
+# Pull Docker images
+- name: Pull images
+  ansible.builtin.command:
+    cmd: docker compose pull
+    chdir: "{{ redis_install_dir }}"
+  register: _command_output
+  changed_when: _command_output.rc == 0
+  when: redis_docker_pull
+  notify: Start the Docker Compose project
+
+# Start the Docker Compose project
+- name: Start the Docker Compose project
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: "{{ redis_install_dir }}"
+  register: _command_output
+  changed_when: _command_output.rc == 0
+  notify: Start the Docker Compose project

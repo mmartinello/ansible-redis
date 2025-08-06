@@ -1,0 +1,47 @@
+---
+- name: Create the Redis Configuration directory
+  ansible.builtin.file:
+    path: "{{ redis_host_config_dir_path }}"
+    state: directory
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: "0755"
+    recurse: true
+
+- name: Configure Redis Server
+  ansible.builtin.template:
+    src: redis-server.conf.j2
+    dest: "{{ redis_host_config_dir_path }}/redis-server.conf"
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: '0640'
+  when: redis_config_file_from_template
+  notify: Restart Redis Server
+
+- name: Copy Redis Server config file
+  ansible.builtin.copy:
+    src: "{{ redis_server_config_file_path }}"
+    dest: "{{ redis_host_config_dir_path }}/redis-server.conf"
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: '0640'
+  when: not redis_config_file_from_template
+
+- name: Configure Redis Sentinel
+  ansible.builtin.template:
+    src: redis-sentinel.conf.j2
+    dest: "{{ redis_host_config_dir_path }}/redis-sentinel.conf"
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: '0640'
+  when: redis_install_sentinel and redis_config_file_from_template
+  notify: Restart Redis Sentinel
+
+- name: Copy Redis Sentinel config file
+  ansible.builtin.copy:
+    src: "{{ redis_sentinel_config_file_path }}"
+    dest: "{{ redis_host_config_dir_path }}/redis-sentinel.conf"
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: '0640'
+  when: redis_install_sentinel and not redis_config_file_from_template

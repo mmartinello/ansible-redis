@@ -1,0 +1,46 @@
+# {{ ansible_managed }}
+
+# Redis Sentinel configuration file
+
+# Protected mode is off by default in sentinel mode. Ensure firewall protection.
+protected-mode {{ 'no' if not redis_sentinel_protected_mode or redis_sentinel_protected_mode == 'no' else 'yes' }}
+
+# Sentinel port
+port 26379
+
+# Sentinel does not run as a daemon by default. Set to 'yes' if needed.
+daemonize no
+
+# Log file name. Use empty string for standard output.
+logfile "/var/log/redis-sentinel.log"
+
+# Working directory for Sentinel.
+dir "/var/lib/redis"
+
+# Monitor master with quorum agreement for O_DOWN state.
+sentinel monitor {{ redis_sentinel_master_name }} {{ redis_sentinel_master_ip }} {{ redis_sentinel_master_port }} {{ redis_sentinel_quorum }}
+
+# Set password for master and replicas authentication.
+# sentinel auth-pass <master-name> <password>
+{% if redis_sentinel_master_password is defined %}
+sentinel auth-pass {{ redis_sentinel_master_name }} {{ redis_sentinel_master_password }}
+{% endif %}
+
+# Authenticate using ACL capabilities for Redis 6.0+.
+# sentinel auth-user <master-name> <username>
+{% if redis_sentinel_master_user is defined %}
+sentinel auth-user {{ redis_sentinel_master_name }} {{ redis_sentinel_master_user }}
+{% endif %}
+
+# Time in milliseconds to consider master in S_DOWN state.
+sentinel down-after-milliseconds {{ redis_sentinel_master_name }} {{ redis_sentinel_down_after_milliseconds }}
+
+# Failover timeout in milliseconds.
+sentinel failover-timeout {{ redis_sentinel_master_name }} {{ redis_sentinel_failover_timeout }}
+
+# Announce IP and port for Sentinel in NAT environments.
+sentinel announce-ip {{ redis_sentinel_announce_ip }}
+sentinel announce-port {{ redis_sentinel_announce_port }}
+
+# SECURITY: Prevent runtime changes to notification and reconfig scripts.
+sentinel deny-scripts-reconfig yes

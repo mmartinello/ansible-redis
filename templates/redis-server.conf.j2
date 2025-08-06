@@ -1,0 +1,232 @@
+# {{ ansible_managed }}
+
+# Redis Server configuration file
+
+################################## NETWORK #####################################
+
+# Bind to specific IP addresses or all interfaces.
+bind * -::*
+
+# Enable or disable protected mode for security.
+protected-mode {{ 'no' if not redis_server_protected_mode or redis_server_protected_mode == 'no' else 'yes' }}
+
+# Set the port for Redis to listen on, default is 6379.
+port 6379
+
+# Configure TCP backlog for handling connections.
+tcp-backlog {{ redis_server_tcp_backlog }}
+
+# Set client idle timeout in seconds.
+timeout {{ redis_server_timeout }}
+
+# Configure TCP keepalive to detect dead peers.
+tcp-keepalive {{ redis_server_tcp_keepalive }}
+
+
+################################# GENERAL #####################################
+
+# Run Redis as a daemon or not.
+daemonize no
+
+# Set supervision method for Redis.
+supervised no
+
+# Set the verbosity level of logs.
+loglevel {{ redis_server_loglevel }}
+
+# Specify the log file location.
+logfile "/var/log/redis-server.log"
+
+# Set the number of databases.
+databases {{ redis_server_databases }}
+
+# Always show ASCII art logo on startup.
+always-show-logo yes
+
+
+################################ SNAPSHOTTING  ################################
+
+# Configure DB snapshot saving intervals.
+{% for save in redis_server_save %}
+save {{ save }}
+{% endfor %}
+
+# Stop writes if background save fails.
+stop-writes-on-bgsave-error yes
+
+# Enable or disable RDB compression.
+rdbcompression yes
+
+# Enable or disable RDB checksum for integrity.
+rdbchecksum yes
+
+# Set the filename for the DB dump.
+dbfilename "dump.rdb"
+
+# Set the working directory for DB files.
+dir "/var/lib/redis"
+
+
+################################# REPLICATION #################################
+
+# Configure master-replica replication.
+# replicaof <masterip> <masterport>
+{% if redis_server_replicaof is defined %}
+replicaof {{ redis_server_replicaof.host }} {{ redis_server_replicaof.port }}
+{% endif %}
+
+# Set password for replica to authenticate with master.
+# masterauth <master-password>
+{% if redis_server_masterauth is defined %}
+masterauth {{ redis_server_masterauth }}
+{% endif %}
+
+# Set user for replication if using ACLs.
+# masteruser <username>
+{% if redis_server_masteruser is defined %}
+masteruser {{ redis_server_masteruser }}
+{% endif %}
+
+# Allow or disallow serving stale data on replicas.
+replica-serve-stale-data yes
+
+# Set replicas to be read-only.
+replica-read-only yes
+
+# Announce replica IP and port to master.
+replica-announce-ip {{ redis_server_replica_announce_ip }}
+replica-announce-port {{ redis_server_replica_announce_port }}
+
+# Choose replication sync strategy: disk or socket.
+repl-diskless-sync no
+
+# Set delay for diskless replication sync.
+repl-diskless-sync-delay 5
+
+# Disable TCP_NODELAY on replica socket after SYNC.
+repl-disable-tcp-nodelay no
+
+# Set priority for replica promotion.
+replica-priority 100
+
+
+################################## SECURITY ###################################
+
+# Set maximum length for ACL log.
+acllog-max-len 128
+
+# Set password for default user if protected mode is enabled.
+{% if redis_server_protected_mode %}
+requirepass {{ redis_server_requirepass }}
+{% endif %}
+
+
+############################## MEMORY MANAGEMENT ################################
+
+# Set maximum memory usage limit.
+maxmemory {{ redis_server_maxmemory }}
+
+
+############################# LAZY FREEING ####################################
+
+# Configure lazy freeing for eviction, expiration, and server deletion.
+lazyfree-lazy-eviction no
+lazyfree-lazy-expire no
+lazyfree-lazy-server-del no
+replica-lazy-flush no
+
+
+############################## APPEND ONLY MODE ###############################
+
+# Enable or disable append-only mode for durability.
+appendonly no
+
+# Set the base name for append-only files.
+appendfilename "appendonly.aof"
+
+# Set fsync policy for append-only files.
+appendfsync everysec
+
+# Disable fsync during rewrite to avoid latency.
+no-appendfsync-on-rewrite no
+
+# Configure automatic rewrite of append-only file.
+auto-aof-rewrite-percentage 100
+auto-aof-rewrite-min-size 64mb
+
+# Load truncated AOF file on startup.
+aof-load-truncated yes
+
+# Use RDB preamble for append-only files.
+aof-use-rdb-preamble yes
+
+
+################ NON-DETERMINISTIC LONG BLOCKING COMMANDS #####################
+
+
+################################## SLOW LOG ###################################
+
+# Set slow log threshold in microseconds.
+slowlog-log-slower-than 10000
+
+# Set maximum length of the slow log.
+slowlog-max-len 128
+
+
+################################ LATENCY MONITOR ##############################
+
+# Set latency monitor threshold in milliseconds.
+latency-monitor-threshold 0
+
+
+############################# EVENT NOTIFICATION ##############################
+
+# Configure keyspace event notifications.
+notify-keyspace-events ""
+
+
+############################### ADVANCED CONFIG ###############################
+
+# Set maximum entries and value size for hash encoding.
+hash-max-listpack-entries 512
+hash-max-listpack-value 64
+
+# Set maximum listpack size for lists.
+list-max-listpack-size -2
+
+# Set compression depth for lists.
+list-compress-depth 0
+
+# Set maximum entries for integer set encoding.
+set-max-intset-entries 512
+
+# Set maximum entries and value size for sorted set encoding.
+zset-max-listpack-entries 128
+zset-max-listpack-value 64
+
+# Set maximum bytes for HyperLogLog sparse representation.
+hll-sparse-max-bytes 3000
+
+# Set maximum size and entries for stream nodes.
+stream-node-max-bytes 4kb
+stream-node-max-entries 100
+
+# Enable or disable active rehashing.
+activerehashing yes
+
+# Set client output buffer limits for different client classes.
+client-output-buffer-limit normal 0 0 0
+client-output-buffer-limit replica 256mb 64mb 60
+client-output-buffer-limit pubsub 32mb 8mb 60
+
+# Set the frequency of background task checks.
+hz 10
+
+# Enable or disable dynamic HZ for adaptive responsiveness.
+dynamic-hz yes
+
+# Enable incremental fsync during AOF rewrite.
+aof-rewrite-incremental-fsync yes
+
+# Enable incremental fsync during RDB save.
+rdb-save-incremental-fsync yes
