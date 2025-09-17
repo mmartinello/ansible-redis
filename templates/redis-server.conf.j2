@@ -72,7 +72,7 @@ dir "/var/lib/redis"
 # Configure master-replica replication.
 # replicaof <masterip> <masterport>
 {% if redis_server_replicaof is defined %}
-replicaof {{ redis_server_replicaof.host }} {{ redis_server_replicaof.port }}
+replicaof {{ redis_server_replicaof.host }} {{ redis_server_replicaof.port | default(redis_server_host_port) }}
 {% endif %}
 
 # Set password for replica to authenticate with master.
